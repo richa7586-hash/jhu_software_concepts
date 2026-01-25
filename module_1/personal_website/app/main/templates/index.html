@@ -1,0 +1,23 @@
+{% extends "navigation_bar_base.html" %}
+
+{% block content %}
+  <div class="row g-4 align-items-stretch">
+    <div class="col-12 col-lg-7">
+      <section class="content-card h-100">
+        <h1 class="display-title">Richa Agrawal</h1>
+        <p class="kicker">Software Development Engineer in Test</p>
+        <p class="lead-text">
+          Richa Agrawal is a Software Development Engineer in Test at Amazon with 15 years of experience in the software industry. She holds a Bachelor’s degree in Information Technology and brings a strong commitment to quality, collaboration, and continuous improvement. Known for being strong-willed and a dependable team player, she enjoys working with cross-functional teams to deliver reliable and scalable software solutions. Outside of work, Richa loves traveling and exploring new places.
+        </p>
+
+      </section>
+    </div>
+    <div class="col-12 col-lg-5">
+      <section class="profile-card h-100">
+        <div class="image-frame">
+          <img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="Portrait of Richa Agrawal">
+        </div>
+      </section>
+    </div>
+  </div>
+{% endblock %}

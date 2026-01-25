@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ page_title }} | Richa</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Work+Sans:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.3/dist/lux/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/site.css') }}" rel="stylesheet">
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="py-4">
+        <div class="container">
+          <nav class="site-nav d-flex justify-content-between align-items-center">
+            <div class="brand">Richa Agrawal</div>
+            <div class="nav-links">
+              <a class="link {% if request.path == '/' %}active{% endif %}" href="/">Home</a>
+              <a class="link {% if request.path == '/contact_info' %}active{% endif %}" href="/contact_info">Contact Info</a>
+              <a class="link {% if request.path == '/projects' %}active{% endif %}" href="/projects">Projects</a>
+            </div>
+          </nav>
+        </div>
+      </header>
+      <main class="container pb-5">
+        {% block content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>
