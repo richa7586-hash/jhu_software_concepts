@@ -4,13 +4,25 @@ import config
 
 # Database connection parameters
 DB_CONFIG = {
-    "dbname": "gradcafe",
-    "user": "richa",
-    "password": "richa",
-    "host": "localhost",
-    "port": 5432
+    "dbname": config.DB_NAME,
+    "user": config.DB_USER,
+    "password": config.DB_PASSWORD,
+    "host": config.DB_HOST,
+    "port": config.DB_PORT
 }
 
+#Connect to database
+connection = psycopg.connect(
+    dbname=config.DB_NAME,
+    user=config.DB_USER,
+    password=config.DB_PASSWORD)
+
+with connection.cursor() as cur:
+    cur.execute("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
+    results = cur.fetchall()
+    print(results)
+
+connection.close()
 
 def create_table_if_not_exists(conn):
     """Create the applicant table if it doesn't exist"""
