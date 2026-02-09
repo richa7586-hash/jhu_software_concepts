@@ -1,3 +1,4 @@
+from datetime import datetime
 import json
 import psycopg
 import config
@@ -11,23 +12,11 @@ DB_CONFIG = {
     "port": config.DB_PORT
 }
 
-#Connect to database
-connection = psycopg.connect(
-    dbname=config.DB_NAME,
-    user=config.DB_USER,
-    password=config.DB_PASSWORD)
-
-with connection.cursor() as cur:
-    cur.execute("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname != 'pg_catalog' AND schemaname != 'information_schema';")
-    results = cur.fetchall()
-    print(results)
-
-connection.close()
 
 def create_table_if_not_exists(conn):
     """Create the applicant table if it doesn't exist"""
-    create_table_query = """
-    CREATE TABLE IF NOT EXISTS applicant (
+    create_table_query = f"""
+    CREATE TABLE IF NOT EXISTS {config.TABLE_NAME} (
         p_id SERIAL PRIMARY KEY,
         program TEXT,
         comments TEXT,
@@ -47,12 +36,20 @@ def create_table_if_not_exists(conn):
     """
     with conn.cursor() as cursor:
         cursor.execute(create_table_query)
-    conn.commit()
+    cursor.close()
     print("Table 'applicant' created or already exists.")
 
 
+def parse_date(date_string):
+    """Parse date string like 'January 31, 2026' to date object"""
+    try:
+        return datetime.strptime(date_string, "%B %d, %Y").date()
+    except (ValueError, TypeError):
+        return None
+
+
 def load_jsonl_data(filepath):
-    """Load and parse JSONL file"""
+    """Load and parse JSONL file with correct field mapping"""
     records = []
     with open(filepath, 'r') as f:
         for line in f:
@@ -60,18 +57,18 @@ def load_jsonl_data(filepath):
             records.append((
                 record.get('program'),
                 record.get('comments'),
-                record.get('date_added'),
+                parse_date(record.get('date_added')),
                 record.get('url'),
-                record.get('status'),
-                record.get('term'),
-                record.get('us_or_international'),
+                record.get('applicant_status'),
+                record.get('semester_year_start'),
+                record.get('citizenship'),
                 record.get('gpa'),
                 record.get('gre'),
                 record.get('gre_v'),
                 record.get('gre_aw'),
-                record.get('degree'),
-                record.get('llm_generated_program'),
-                record.get('llm_generated_university')
+                record.get('masters_or_phd'),
+                record.get('llm-generated-program'),
+                record.get('llm-generated-university')
             ))
     return records
 
@@ -84,13 +81,13 @@ def bulk_insert_with_skip_duplicates(conn, records):
         us_or_international, gpa, gre, gre_v, gre_aw, degree,
         llm_generated_program, llm_generated_university
     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-    ON CONFLICT (url) DO NOTHING
+    ON CONFLICT (url) DO NOTHING;
     """
 
     with conn.cursor() as cursor:
         cursor.executemany(insert_query, records)
 
-    conn.commit()
+    cursor.close()
     print(f"Successfully processed {len(records)} records (duplicates skipped).")
 
 
@@ -106,8 +103,8 @@ def main():
 
             # Load JSONL data
             print("Loading JSONL data...")
-            records = load_jsonl_data('applicant_data.jsonl')
-            print(f"Loaded {len(records)} records from JSONL file.")
+            records = load_jsonl_data(config.APPLICANT_DATA_JSON_FILE)
+            print(f"Loaded {len(records)} records from JSON file.")
 
             # Bulk insert with duplicate handling
             print("Inserting data into database...")
@@ -118,7 +115,7 @@ def main():
     except psycopg.Error as e:
         print(f"Database error: {e}")
     except FileNotFoundError:
-        print("Error: applicant_data.jsonl file not found.")
+        print("Error: applicant_data.json file not found.")
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
     except Exception as e:
