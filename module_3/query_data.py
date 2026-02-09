@@ -62,7 +62,9 @@ question_sql_dict[
         FROM {config.TABLE_NAME}
         WHERE (program LIKE '%Computer Science%' OR llm_generated_program LIKE '%Computer Science%')
             AND degree = 'Masters' AND 
-                (llm_generated_university like '%Johns Hopkins%' OR llm_generated_university like 'John%'
+                (program like '%Johns Hopkins%' 
+                OR program like '%JHU%' 
+                OR llm_generated_university like '%Johns Hopkins%' OR llm_generated_university like 'John%'
             OR llm_generated_university like '%JHU%');
     """
 
@@ -120,6 +122,15 @@ question_sql_dict["What are the top 10 distinct programs applied for Fall 2026?"
         ORDER BY program
         LIMIT 10;
     """
+
+
+
+question_sql_dict["How many total applicants you have in your db?"] = \
+    f"""
+        SELECT count(*)
+        FROM {config.TABLE_NAME};
+    """
+
 
 
 def main():

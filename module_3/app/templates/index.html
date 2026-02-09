@@ -32,6 +32,8 @@
         </div>
       </header>
 
+      <div id="status-message" class="alert d-none" role="alert"></div>
+
       <div class="d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between gap-3 mb-4">
         <div>
           <h2 class="h5 mb-1">Pull New GradCafe Data</h2>
@@ -78,5 +80,63 @@
         </ul>
       </div>
     </div>
+    <script>
+      const pullButton = document.getElementById("pull-data");
+      const updateButton = document.getElementById("update-analysis");
+      const statusMessage = document.getElementById("status-message");
+
+      const showStatus = (message, type = "info") => {
+        statusMessage.textContent = message;
+        statusMessage.className = `alert alert-${type}`;
+        statusMessage.classList.remove("d-none");
+      };
+
+      const clearStatus = () => {
+        statusMessage.textContent = "";
+        statusMessage.className = "alert d-none";
+      };
+
+      const refreshButtons = async () => {
+        const response = await fetch("/pull-status");
+        const data = await response.json();
+        const running = data.running;
+        pullButton.disabled = running;
+        updateButton.disabled = running;
+        if (running) {
+          showStatus("Pulling data now. Update Analysis will be available when the pull finishes.", "warning");
+        } else {
+          clearStatus();
+        }
+      };
+
+      pullButton.addEventListener("click", async () => {
+        const response = await fetch("/pull-data", { method: "POST" });
+        if (response.status === 409) {
+          showStatus("A pull is already running. Please wait.", "warning");
+          return;
+        }
+        showStatus("Pull started. This will run for about a minute.", "info");
+        await refreshButtons();
+      });
+
+      updateButton.addEventListener("click", async () => {
+        const response = await fetch("/pull-status");
+        const data = await response.json();
+        if (data.running) {
+          showStatus("Cannot update analysis while a pull is running.", "warning");
+          return;
+        }
+        showStatus("Updating analysis from the latest cleaned data...", "info");
+        const updateResponse = await fetch("/update-analysis", { method: "POST" });
+        if (updateResponse.status === 409) {
+          showStatus("Cannot update analysis while a pull is running.", "warning");
+          return;
+        }
+        window.location.reload();
+      });
+
+      refreshButtons();
+      setInterval(refreshButtons, 5000);
+    </script>
   </body>
 </html>

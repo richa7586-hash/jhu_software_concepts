@@ -6,8 +6,8 @@
 # How It Works
 Load collected data into a PostgreSQL database using psycopg
 Carry out data analysis using SQL queries to answer questions about submission entries to grad café.
-Display your analysis results on a dynamic flask webpage (our first!)
-Write two paragraphs about the inherent limitations caused by using grad café (and similar self-submit sites) as data sources.
+Created a flask page to display the query results
+Also added two buttons on the page to allow users to pull latest data, clean it and then insert in DB.
 
 # Requirements
 - Python 3.10+
@@ -22,5 +22,15 @@ Write two paragraphs about the inherent limitations caused by using grad café (
 3) Install dependencies:
    pip install -r requirements.txt
 
-4) to run
-    python main.py
+4) to run the web app:
+    python run.py
+
+    Navigate to http://127.0.0.1:5000/
+
+5) To load data to the database:
+    python load_data.py
+
+6) To query data from the database:
+    python query_data.py
+
+

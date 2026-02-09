@@ -1,11 +1,19 @@
-from flask import Flask, render_template
+from flask import Flask, jsonify, render_template
+import os
+import subprocess
+import sys
+import threading
 import psycopg
 import config
 from query_data import question_sql_dict
 
+_pull_lock = threading.Lock()
+_pull_process = None
+
 # Create the Flask application instance.
 def create_app():
     app = Flask(__name__)
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
     @app.route("/")
     def index():
@@ -39,6 +47,38 @@ def create_app():
                     })
 
         return render_template("index.html", results=results)
+
+    @app.route("/pull-data", methods=["POST"])
+    def pull_data():
+        global _pull_process
+        with _pull_lock:
+            if _pull_process and _pull_process.poll() is None:
+                return jsonify({"status": "running"}), 409
+
+            _pull_process = subprocess.Popen(
+                [sys.executable, os.path.join(base_dir, "scrape.py")],
+                cwd=base_dir,
+            )
+        return jsonify({"status": "started"})
+
+    @app.route("/pull-status", methods=["GET"])
+    def pull_status():
+        with _pull_lock:
+            running = _pull_process is not None and _pull_process.poll() is None
+        return jsonify({"running": running})
+
+    @app.route("/update-analysis", methods=["POST"])
+    def update_analysis():
+        with _pull_lock:
+            if _pull_process and _pull_process.poll() is None:
+                return jsonify({"status": "running"}), 409
+
+        subprocess.run(
+            [sys.executable, os.path.join(base_dir, "load_data.py")],
+            cwd=base_dir,
+            check=True,
+        )
+        return jsonify({"status": "updated"})
 
     # Register modular page blueprints
     return app

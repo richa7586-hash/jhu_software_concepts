@@ -1,3 +1,4 @@
+import curses
 from datetime import datetime
 import json
 import re
@@ -125,6 +126,7 @@ def bulk_insert_with_skip_duplicates(conn, records):
                     print(f"Row {i} error: {row_err}")
                     print(f"Row {i} data: {row}")
                     raise
+        cursor.connection.commit()
     cursor.close()
     print(f"Successfully processed {len(records)} records (duplicates skipped).")
 
