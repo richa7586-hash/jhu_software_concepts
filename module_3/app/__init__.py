@@ -11,6 +11,7 @@ def create_app():
     def index():
         results = []
         with psycopg.connect(
+            dbname=config.DB_NAME,
             user=config.DB_USER,
             password=config.DB_PASSWORD,
             host=config.DB_HOST,
