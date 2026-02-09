@@ -7,7 +7,7 @@ import config
 def load_data(file_path=None):
     """Load applicant data from JSON file"""
     if file_path is None:
-        file_path = config.data_file
+        file_path = config.DATA_FILE
 
     try:
         with open(file_path, 'r', encoding='utf-8') as f:
@@ -25,7 +25,7 @@ def load_data(file_path=None):
 def clean_data(input_file=None, llm_script_path="../llm_hosting/app.py", output_file=None):
     """Clean applicant data using LLM by calling external Python script"""
     if input_file is None:
-        input_file = config.data_file
+        input_file = config.DATA_FILE
     if output_file is None:
         output_file = config.APPLICANT_DATA_JSON_FILE
 

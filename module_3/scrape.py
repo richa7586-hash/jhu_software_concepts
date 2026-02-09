@@ -14,9 +14,9 @@ class GradCafeScraper:
     """Scraper for The Grad Cafe applicant data"""
 
     def __init__(self):
-        self.base_url = config.base_url.rstrip('/')
-        self.list_url_template = config.list_url_template
-        self.data_file = config.data_file
+        self.base_url = config.BASE_URL.rstrip('/')
+        self.list_url_template = config.LIST_URL_TEMPLATE
+        self.data_file = config.DATA_FILE
 
     # ==================== Fetching Methods ====================
 
@@ -289,6 +289,7 @@ class GradCafeScraper:
 
     def pull_data(self, max_seconds=10):
         """Scrape list pages starting from page 1 for up to max_seconds."""
+        """Once pull is complete, run clean_data.py to clean and save data to JSON file."""
         start_time = time.time()
         page_num = 1
         total_records = 0
