@@ -28,14 +28,15 @@ question_sql_dict[("What percentage of entries are from international students (
 
 question_sql_dict["What is the average GPA, GRE, GRE V, GRE AW of applicants who provide these metrics?"] = \
     f"""
-        SELECT AVG(gpa) AS avg_gpa, AVG(gre) AS avg_gre, AVG(gre_v) AS avg_gre_v, AVG(gre_aw) AS avg_gre_aw
+        SELECT ROUND(AVG(gpa)::numeric, 2)   AS avg_gpa, ROUND(AVG(gre)::numeric,2) AS avg_gre, 
+            ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v, ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
         FROM {config.TABLE_NAME}
         WHERE gpa IS NOT NULL OR gre IS NOT NULL OR gre_v IS NOT NULL OR gre_aw IS NOT NULL;
     """
 
 question_sql_dict["What is their average GPA of American students in Fall 2026?"] = \
     f"""
-        SELECT AVG(gpa) AS avg_gpa
+        SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
         FROM {config.TABLE_NAME}
         WHERE us_or_international = 'American' AND term = 'Fall 2026';
     """
@@ -49,7 +50,7 @@ question_sql_dict["What percent of entries for Fall 2026 are Acceptances (to two
 
 question_sql_dict["What is the average GPA of applicants who applied for Fall 2026 who are Acceptances?"] = \
     f"""
-        SELECT AVG(gpa) AS avg_gpa
+        SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
         FROM {config.TABLE_NAME}
         WHERE term = 'Fall 2026' AND status = 'Accepted';
     """
@@ -61,7 +62,7 @@ question_sql_dict[
         FROM {config.TABLE_NAME}
         WHERE (program LIKE '%Computer Science%' OR llm_generated_program LIKE '%Computer Science%')
             AND degree = 'Masters' AND 
-                (llm_generated_university like '%Johns Hopkins%' OR llm_generated_university like '%John Hopkins%'
+                (llm_generated_university like '%Johns Hopkins%' OR llm_generated_university like 'John%'
             OR llm_generated_university like '%JHU%');
     """
 
@@ -74,7 +75,7 @@ question_sql_dict[("How many entries from 2026 are acceptances from applicants w
           AND status = 'Accepted'
           AND (program LIKE '%Computer Science%')
           AND (degree LIKE '%PhD%')
-          AND ( LIKE '%Georgetown%'
+          AND ( program LIKE '%Georgetown%'
                OR program LIKE '%MIT%'
                OR program LIKE '%Massachusetts Institute of Technology%'
                OR program LIKE '%Stanford%'
@@ -92,7 +93,7 @@ question_sql_dict[("Do you numbers for question 8 change if you use LLM Generate
           AND status = 'Accepted'
           AND (llm_generated_program LIKE '%Computer Science%')
           AND (degree LIKE '%PhD%')
-          AND ( LIKE '%Georgetown%'
+          AND ( llm_generated_university LIKE '%Georgetown%'
                OR llm_generated_university LIKE '%MIT%'
                OR llm_generated_university LIKE '%Massachusetts Institute of Technology%'
                OR llm_generated_university LIKE '%Stanford%'
@@ -101,9 +102,9 @@ question_sql_dict[("Do you numbers for question 8 change if you use LLM Generate
 
     """
 
-question_sql_dict["Which universities have the highest acceptance rates in Fall 2026?"] = \
+question_sql_dict["Which top 5 universities have the highest acceptance rates in Fall 2026?"] = \
     f"""
-        SELECT llm_generated_university, ROUND(COUNT(CASE WHEN status = 'Accepted' THEN 1 END) * 100.0 / COUNT(*), 2) AS acceptance_rate
+        SELECT llm_generated_university as University, ROUND(COUNT(CASE WHEN status = 'Accepted' THEN 1 END) * 100.0 / COUNT(*), 2) AS acceptance_rate
         FROM {config.TABLE_NAME}
         WHERE term = 'Fall 2026'
         GROUP BY llm_generated_university
@@ -125,15 +126,17 @@ def main():
     with psycopg.connect(**DB_CONFIG) as conn:
         # Open a cursor to execute SQL queries
         cur = conn.cursor()
-
+        counter = 1
         # Execute each query and print the result
         for question, query in question_sql_dict.items():
-            print(f"Question: {question}")
+            print(f"Question {counter}: {question}")
             cur.execute(query)
             result = cur.fetchall()
+            #print(f"Result: {result}")
             for row in result:
-                print(row)
+                print(row[0])
             print("\n")
+            counter += 1
 
         # Close the cursor
         cur.close()

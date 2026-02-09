@@ -1,5 +1,6 @@
 from datetime import datetime
 import json
+import re
 import psycopg
 import config
 
@@ -48,6 +49,18 @@ def parse_date(date_string):
         return None
 
 
+def parse_float(value):
+    """Extract first numeric value from mixed strings (e.g., 'GPA 3.89')."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    match = re.search(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", str(value))
+    return float(match.group()) if match else None
+
+
+
+
 def load_jsonl_data(filepath):
     """Load and parse JSONL file with correct field mapping"""
     records = []
@@ -62,10 +75,10 @@ def load_jsonl_data(filepath):
                 record.get('applicant_status'),
                 record.get('semester_year_start'),
                 record.get('citizenship'),
-                record.get('gpa'),
-                record.get('gre'),
-                record.get('gre_v'),
-                record.get('gre_aw'),
+                parse_float(record.get('gpa')),
+                parse_float(record.get('gre')),
+                parse_float(record.get('gre_v')),
+                parse_float(record.get('gre_aw')),
                 record.get('masters_or_phd'),
                 record.get('llm-generated-program'),
                 record.get('llm-generated-university')
@@ -83,10 +96,35 @@ def bulk_insert_with_skip_duplicates(conn, records):
     ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
     ON CONFLICT (url) DO NOTHING;
     """
+    column_names = [
+        "program", "comments", "date_added", "url", "status", "term",
+        "us_or_international", "gpa", "gre", "gre_v", "gre_aw", "degree",
+        "llm_generated_program", "llm_generated_university"
+    ]
+
+    def find_nul_fields(row):
+        nul_fields = []
+        for idx, value in enumerate(row):
+            if isinstance(value, str) and "\x00" in value:
+                nul_fields.append((idx, column_names[idx]))
+        return nul_fields
 
     with conn.cursor() as cursor:
-        cursor.executemany(insert_query, records)
-
+        try:
+            cursor.executemany(insert_query, records)
+        except psycopg.Error as e:
+            print(f"Bulk insert failed: {e}")
+            print("Scanning rows to locate the offending record...")
+            for i, row in enumerate(records, start=1):
+                try:
+                    cursor.execute(insert_query, row)
+                except psycopg.Error as row_err:
+                    nul_fields = find_nul_fields(row)
+                    if nul_fields:
+                        print(f"Row {i} contains NUL bytes in fields: {nul_fields}")
+                    print(f"Row {i} error: {row_err}")
+                    print(f"Row {i} data: {row}")
+                    raise
     cursor.close()
     print(f"Successfully processed {len(records)} records (duplicates skipped).")
 
@@ -111,6 +149,7 @@ def main():
             bulk_insert_with_skip_duplicates(conn, records)
 
             print("Data loading completed successfully!")
+            conn.close()
 
     except psycopg.Error as e:
         print(f"Database error: {e}")
