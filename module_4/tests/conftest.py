@@ -16,40 +16,43 @@ import app as app_module
 from app import create_app
 
 
-# Provide a client that renders /analysis without hitting a real database.
+# Factory fixture to build a client for /analysis with stubbed DB rows.
 @pytest.fixture
 def analysis_client(monkeypatch):
-    class DummyCursor:
-        def __init__(self):
-            self.description = [SimpleNamespace(name="value")]
+    def _build(rows=None, question="Q1"):
+        class DummyCursor:
+            def __init__(self):
+                self.description = [SimpleNamespace(name="value")]
 
-        def __enter__(self):
-            return self
+            def __enter__(self):
+                return self
 
-        def __exit__(self, exc_type, exc, tb):
-            return False
+            def __exit__(self, exc_type, exc, tb):
+                return False
 
-        def execute(self, query):
-            return None
+            def execute(self, query):
+                return None
 
-        def fetchall(self):
-            return [(1,)]
+            def fetchall(self):
+                return [(1,)] if rows is None else rows
 
-    class DummyConnection:
-        def __enter__(self):
-            return self
+        class DummyConnection:
+            def __enter__(self):
+                return self
 
-        def __exit__(self, exc_type, exc, tb):
-            return False
+            def __exit__(self, exc_type, exc, tb):
+                return False
 
-        def cursor(self):
-            return DummyCursor()
+            def cursor(self):
+                return DummyCursor()
 
-    monkeypatch.setattr(app_module, "question_sql_dict", {"Q1": "SELECT 1;"})
-    monkeypatch.setattr(app_module.psycopg, "connect", lambda **kwargs: DummyConnection())
+        monkeypatch.setattr(app_module, "question_sql_dict", {question: "SELECT 1;"})
+        monkeypatch.setattr(app_module.psycopg, "connect", lambda **kwargs: DummyConnection())
 
-    app = app_module.create_app()
-    return app.test_client()
+        app = app_module.create_app()
+        return app.test_client()
+
+    return _build
 
 
 # Small helper fixture to post to a route with a fresh test client.

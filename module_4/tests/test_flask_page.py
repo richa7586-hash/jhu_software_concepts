@@ -37,7 +37,7 @@ def test_required_route_methods_are_present():
 
 def test_analysis_page_loads(analysis_client):
     # Confirm the analysis page responds successfully.
-    client = analysis_client
+    client = analysis_client()
     response = client.get("/analysis")
 
     assert response.status_code == 200
@@ -45,7 +45,7 @@ def test_analysis_page_loads(analysis_client):
 
 def test_analysis_page_contains_required_content(analysis_client):
     # Check for key labels/buttons in the rendered analysis page.
-    client = analysis_client
+    client = analysis_client()
     response = client.get("/analysis")
 
     html = response.get_data(as_text=True)

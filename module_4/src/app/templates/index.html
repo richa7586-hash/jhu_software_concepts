@@ -56,7 +56,12 @@
               {% if item.answer is none %}
                 <div class="text-secondary">No data returned.</div>
               {% elif item.answer is string or item.answer is number %}
-                <div class="fw-semibold">{{ item.answer }}</div>
+                {% set is_percent_question = "percent" in item.question|lower %}
+                {% if item.answer is number and is_percent_question %}
+                  <div class="fw-semibold">{{ "%.2f"|format(item.answer|float) }}</div>
+                {% else %}
+                  <div class="fw-semibold">{{ item.answer }}</div>
+                {% endif %}
               {% elif item.answer is iterable and item.columns|length == 1 %}
                 <div class="d-flex flex-column gap-2">
                   {% for entry in item.answer %}
