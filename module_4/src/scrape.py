@@ -4,9 +4,9 @@ import json
 import time
 import re
 from urllib.parse import urljoin
-from model import ApplicantData
-import config
-from clean import clean_data
+from src.model import ApplicantData
+from src import config
+from src.clean import clean_data
 import os
 
 
@@ -309,7 +309,7 @@ class GradCafeScraper:
 
         elapsed = time.time() - start_time
         print(f"Pull complete. Pages scraped: {page_num - 1}, records saved: {total_records}, time: {elapsed:.1f}s")
-        llm_script_path = os.path.join(os.path.dirname(__file__), "llm_hosting", "app.py")
+        llm_script_path = os.path.join(os.path.dirname(__file__), "../llm_hosting", "app.py")
         clean_data(
             input_file=self.data_file,
             llm_script_path=llm_script_path,
