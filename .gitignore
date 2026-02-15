@@ -2,3 +2,4 @@
 .idea/vcs.xml
 .DS_Store
 __pycache__/
+venv/
