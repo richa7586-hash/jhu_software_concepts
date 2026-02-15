@@ -88,8 +88,8 @@ def load_jsonl_data(filepath):
 
 def bulk_insert_with_skip_duplicates(conn, records):
     """Bulk insert data with ON CONFLICT DO NOTHING"""
-    insert_query = """
-    INSERT INTO applicant (
+    insert_query = f"""
+    INSERT INTO {config.TABLE_NAME} (
         program, comments, date_added, url, status, term,
         us_or_international, gpa, gre, gre_v, gre_aw, degree,
         llm_generated_program, llm_generated_university
