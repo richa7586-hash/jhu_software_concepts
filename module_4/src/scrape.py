@@ -4,10 +4,12 @@ import json
 import time
 import re
 from urllib.parse import urljoin
-from src.model import ApplicantData
-from src import config
-from src.clean import clean_data
+from clean import load_data
+from model import ApplicantData
+import config
+from clean import clean_data
 import os
+import load_data
 
 
 class GradCafeScraper:
@@ -315,6 +317,7 @@ class GradCafeScraper:
             llm_script_path=llm_script_path,
             output_file=config.APPLICANT_DATA_JSON_FILE,
         )
+        load_data.main()
 
 
 if __name__ == "__main__":

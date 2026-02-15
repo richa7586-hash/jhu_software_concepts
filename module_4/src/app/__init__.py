@@ -13,7 +13,7 @@ _pull_process = None
 # Create the Flask application instance.
 def create_app():
     app = Flask(__name__)
-    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../src"))
 
     def build_results():
         results = []
@@ -82,11 +82,7 @@ def create_app():
             if _pull_process and _pull_process.poll() is None:
                 return jsonify({"status": "running"}), 409
 
-        subprocess.run(
-            [sys.executable, os.path.join(base_dir, "load_data.py")],
-            cwd=base_dir,
-            check=True,
-        )
+        render_analysis_page()
         return jsonify({"status": "updated"})
 
     # Register modular page blueprints
