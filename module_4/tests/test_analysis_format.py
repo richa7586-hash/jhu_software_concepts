@@ -23,3 +23,13 @@ def test_analysis_page_formats_percentages_with_two_decimals(analysis_client):
     html = response.get_data(as_text=True)
 
     assert "12.30" in html
+
+
+@pytest.mark.analysis
+def test_analysis_page_handles_empty_results(analysis_client):
+    # Ensure empty query results render the fallback message.
+    client = analysis_client(rows=[])
+    response = client.get("/analysis")
+    html = response.get_data(as_text=True)
+
+    assert "No data returned." in html

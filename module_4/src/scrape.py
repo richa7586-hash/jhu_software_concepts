@@ -200,10 +200,10 @@ class GradCafeScraper:
 
         # Extract status and status date
         status_patterns = [
-            (r'Accepted\s+on\s+(.+?)(?=Fall|Spring|Summer|\d{4}|American|International|GPA|$)', 'Accepted'),
-            (r'Rejected\s+on\s+(.+?)(?=Fall|Spring|Summer|\d{4}|American|International|GPA|$)', 'Rejected'),
-            (r'Interview\s+on\s+(.+?)(?=Fall|Spring|Summer|\d{4}|American|International|GPA|$)', 'Interview'),
-            (r'Wait\s*listed\s+on\s+(.+?)(?=Fall|Spring|Summer|\d{4}|American|International|GPA|$)', 'Wait listed'),
+            (r'Accepted\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Accepted'),
+            (r'Rejected\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Rejected'),
+            (r'Interview\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Interview'),
+            (r'Wait\s*listed\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Wait listed'),
         ]
 
         for pattern, status_value in status_patterns:

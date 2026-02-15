@@ -59,3 +59,13 @@ def test_analysis_page_contains_required_content(analysis_client):
     assert "Update Analysis" in html
     assert "Analysis" in html
     assert "Answer:" in html
+
+
+@pytest.mark.web
+def test_root_redirects_to_analysis(analysis_client):
+    # Ensure the root route redirects to /analysis.
+    client = analysis_client()
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code == 302
+    assert response.headers["Location"].endswith("/analysis")

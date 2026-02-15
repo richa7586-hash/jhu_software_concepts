@@ -86,3 +86,16 @@ def test_pull_data_returns_409_when_busy(monkeypatch, post_request):
 
     assert response.status_code == 409
     assert response.get_json() == {"status": "running"}
+
+
+@pytest.mark.buttons
+def test_pull_status_reflects_running_process(monkeypatch):
+    # Confirm pull-status reports a running pull.
+    monkeypatch.setattr(app_module, "_pull_process", BusyProcess())
+
+    app = app_module.create_app()
+    client = app.test_client()
+    response = client.get("/pull-status")
+
+    assert response.status_code == 200
+    assert response.get_json() == {"running": True}
