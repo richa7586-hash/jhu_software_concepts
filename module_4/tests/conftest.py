@@ -19,31 +19,41 @@ from app import create_app
 # Factory fixture to build a client for /analysis with stubbed DB rows.
 @pytest.fixture
 def analysis_client(monkeypatch):
+    # Build a test client with stubbed DB access for /analysis.
     def _build(rows=None, question="Q1"):
+        # Create a client using a fake DB connection that returns provided rows.
         class DummyCursor:
             def __init__(self):
+                # Provide column metadata needed by the app.
                 self.description = [SimpleNamespace(name="value")]
 
             def __enter__(self):
+                # Support context manager usage in DB cursor.
                 return self
 
             def __exit__(self, exc_type, exc, tb):
+                # Do not suppress exceptions from the context manager.
                 return False
 
             def execute(self, query):
+                # No-op for stubbed queries.
                 return None
 
             def fetchall(self):
+                # Return the configured rows for the test.
                 return [(1,)] if rows is None else rows
 
         class DummyConnection:
             def __enter__(self):
+                # Support context manager usage in DB connection.
                 return self
 
             def __exit__(self, exc_type, exc, tb):
+                # Do not suppress exceptions from the context manager.
                 return False
 
             def cursor(self):
+                # Return a stubbed cursor for query execution.
                 return DummyCursor()
 
         monkeypatch.setattr(app_module, "question_sql_dict", {question: "SELECT 1;"})
@@ -58,7 +68,9 @@ def analysis_client(monkeypatch):
 # Small helper fixture to post to a route with a fresh test client.
 @pytest.fixture
 def post_request():
+    # Helper to post to a route using a fresh test client.
     def _post(path, **kwargs):
+        # Create a new client for each POST request.
         app = create_app()
         client = app.test_client()
         return client.post(path, **kwargs)

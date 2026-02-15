@@ -1,6 +1,9 @@
 from decimal import Decimal
 
+import pytest
 
+
+@pytest.mark.analysis
 def test_analysis_page_includes_answer_labels(analysis_client):
     # Verify the analysis page renders Answer labels for results.
     response = analysis_client().get("/analysis")
@@ -9,6 +12,7 @@ def test_analysis_page_includes_answer_labels(analysis_client):
     assert "Answer:" in html
 
 
+@pytest.mark.analysis
 def test_analysis_page_formats_percentages_with_two_decimals(analysis_client):
     # Verify percentage answers render with two decimal places.
     client = analysis_client(

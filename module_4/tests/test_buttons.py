@@ -1,18 +1,23 @@
 import os
 import sys
 
+import pytest
+
 import app as app_module
 
 
 class BusyProcess:
     def poll(self):
+        # Indicate the fake process is still running.
         return None
 
 
 def _setup_pull_data(monkeypatch):
+    # Stub subprocess.Popen to capture pull-data start parameters.
     started = {}
 
     def fake_popen(args, cwd):
+        # Track the arguments used to start the scraper.
         started["args"] = args
         started["cwd"] = cwd
         return BusyProcess()
@@ -23,6 +28,7 @@ def _setup_pull_data(monkeypatch):
     return started
 
 
+@pytest.mark.buttons
 def test_pull_data_returns_200(monkeypatch, post_request):
     # Confirm the pull-data endpoint responds successfully.
     _setup_pull_data(monkeypatch)
@@ -31,6 +37,7 @@ def test_pull_data_returns_200(monkeypatch, post_request):
     assert response.status_code == 200
 
 
+@pytest.mark.buttons
 def test_pull_data_starts_scrape_process(monkeypatch, post_request):
     # Ensure pull-data starts the scraper process without running the real script.
     started = _setup_pull_data(monkeypatch)
@@ -43,6 +50,7 @@ def test_pull_data_starts_scrape_process(monkeypatch, post_request):
     assert app_module._pull_process is not None
 
 
+@pytest.mark.buttons
 def test_update_analysis_returns_200_when_not_busy(monkeypatch, post_request):
     # Confirm update-analysis returns success when no pull is running.
     monkeypatch.setattr(app_module, "_pull_process", None)
@@ -53,6 +61,7 @@ def test_update_analysis_returns_200_when_not_busy(monkeypatch, post_request):
     assert response.get_json() == {"status": "updated"}
 
 
+@pytest.mark.buttons
 def test_update_analysis_returns_409_when_busy(monkeypatch, post_request):
     # Ensure update-analysis is blocked when a pull is already running.
     monkeypatch.setattr(app_module, "_pull_process", BusyProcess())
@@ -63,9 +72,11 @@ def test_update_analysis_returns_409_when_busy(monkeypatch, post_request):
     assert response.get_json() == {"status": "running"}
 
 
+@pytest.mark.buttons
 def test_pull_data_returns_409_when_busy(monkeypatch, post_request):
     # Ensure pull-data is blocked when a pull is already running.
     def fail_popen(*_args, **_kwargs):
+        # Fail fast if the endpoint tries to start a process.
         raise AssertionError("pull-data should not start when busy")
 
     monkeypatch.setattr(app_module, "_pull_process", BusyProcess())

@@ -1,8 +1,10 @@
+import pytest
 from flask import Flask
 
 from app import create_app
 
 
+@pytest.mark.web
 def test_create_app_returns_flask_instance():
     # Ensure the factory returns a usable Flask app for testing.
     app = create_app()
@@ -11,6 +13,7 @@ def test_create_app_returns_flask_instance():
     assert app.test_client() is not None
 
 
+@pytest.mark.web
 def test_required_routes_are_registered():
     # Verify the app registers the core routes needed by the UI and API.
     app = create_app()
@@ -23,6 +26,7 @@ def test_required_routes_are_registered():
     assert "/update-analysis" in routes
 
 
+@pytest.mark.web
 def test_required_route_methods_are_present():
     # Confirm each route exposes the expected HTTP methods.
     app = create_app()
@@ -35,6 +39,7 @@ def test_required_route_methods_are_present():
     assert "POST" in route_methods["/update-analysis"]
 
 
+@pytest.mark.web
 def test_analysis_page_loads(analysis_client):
     # Confirm the analysis page responds successfully.
     client = analysis_client()
@@ -43,6 +48,7 @@ def test_analysis_page_loads(analysis_client):
     assert response.status_code == 200
 
 
+@pytest.mark.web
 def test_analysis_page_contains_required_content(analysis_client):
     # Check for key labels/buttons in the rendered analysis page.
     client = analysis_client()
