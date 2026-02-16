@@ -47,3 +47,16 @@ via a single ``DATABASE_URL`` or via the individual settings below.
 When ``DATABASE_URL`` is set, the app will connect using that value. Otherwise,
 it falls back to ``DB_HOST``, ``DB_PORT``, ``DB_NAME``, ``DB_USER``, and
 ``DB_PASSWORD``.
+
+API Response Notes
+------------------
+The button endpoints return JSON:
+
+- ``POST /pull-data`` -> ``{"ok": true}`` on success, ``{"busy": true}`` with 409
+  if a pull is already running, and ``{"ok": false}`` with 500 if the pull
+  fails to start.
+- ``POST /update-analysis`` -> ``{"ok": true}`` on success and ``{"busy": true}``
+  with 409 when a pull is in progress.
+
+Percent answers render with two decimals and a trailing percent sign (e.g.,
+``39.28%``).

@@ -12,6 +12,13 @@ The Flask app lives in ``src/app/__init__.py`` and exposes routes for:
 The app queries PostgreSQL via ``psycopg`` and renders results with the
 template in ``src/app/templates/index.html``.
 
+For testability, ``create_app`` accepts dependency injection hooks for:
+
+- Query map overrides (``question_map``)
+- Database connection factory (``connect_fn``)
+- DB connection kwargs (``db_kwargs_fn``)
+- Pull starter (``start_pull_fn``)
+
 ETL Layer
 ---------
 The ETL flow is triggered by ``/pull-data``:
