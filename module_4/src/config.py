@@ -1,4 +1,5 @@
 # Configuration settings for the Flask application.
+import os
 HOST = "0.0.0.0"
 PORT = 8080
 
@@ -10,6 +11,22 @@ DB_NAME = "gradcafe"
 DB_USER = "postgres"
 DB_PASSWORD = "postgres"
 TABLE_NAME = "applicant"
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+
+def get_db_connect_kwargs():
+    """Return psycopg connection kwargs, preferring DATABASE_URL when set."""
+    database_url = os.getenv("DATABASE_URL")
+    if database_url:
+        return {"conninfo": database_url}
+    return {
+        "dbname": DB_NAME,
+        "user": DB_USER,
+        "password": DB_PASSWORD,
+        "host": DB_HOST,
+        "port": DB_PORT,
+    }
 
 
 #Grad Cafe Configurations

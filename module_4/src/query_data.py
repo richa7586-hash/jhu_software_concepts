@@ -1,14 +1,7 @@
 import config
 import psycopg
 
-# Database connection parameters
-DB_CONFIG = {
-    "dbname": config.DB_NAME,
-    "user": config.DB_USER,
-    "password": config.DB_PASSWORD,
-    "host": config.DB_HOST,
-    "port": config.DB_PORT
-}
+# Database connection parameters are provided via config.get_db_connect_kwargs().
 
 # Question and sql dic
 question_sql_dict = dict()
@@ -134,7 +127,7 @@ question_sql_dict["How many total applicants you have in your db?"] = \
 
 
 def main():
-    with psycopg.connect(**DB_CONFIG) as conn:
+    with psycopg.connect(**config.get_db_connect_kwargs()) as conn:
         # Open a cursor to execute SQL queries
         cur = conn.cursor()
         counter = 1

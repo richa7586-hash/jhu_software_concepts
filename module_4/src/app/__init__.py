@@ -17,13 +17,7 @@ def create_app():
 
     def build_results():
         results = []
-        with psycopg.connect(
-            dbname=config.DB_NAME,
-            user=config.DB_USER,
-            password=config.DB_PASSWORD,
-            host=config.DB_HOST,
-            port=config.DB_PORT,
-        ) as conn:
+        with psycopg.connect(**config.get_db_connect_kwargs()) as conn:
             with conn.cursor() as cur:
                 for question, query in question_sql_dict.items():
                     cur.execute(query)

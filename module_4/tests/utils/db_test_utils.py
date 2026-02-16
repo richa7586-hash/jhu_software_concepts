@@ -28,13 +28,7 @@ REQUIRED_FIELDS = [
 
 def connect_db():
     # Open a database connection using the current config.
-    return psycopg.connect(
-        dbname=config.DB_NAME,
-        user=config.DB_USER,
-        password=config.DB_PASSWORD,
-        host=config.DB_HOST,
-        port=config.DB_PORT,
-    )
+    return psycopg.connect(**config.get_db_connect_kwargs())
 
 
 def truncate_table(table_name):

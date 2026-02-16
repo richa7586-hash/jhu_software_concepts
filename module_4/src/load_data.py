@@ -4,14 +4,7 @@ import re
 import psycopg
 import config
 
-# Database connection parameters
-DB_CONFIG = {
-    "dbname": config.DB_NAME,
-    "user": config.DB_USER,
-    "password": config.DB_PASSWORD,
-    "host": config.DB_HOST,
-    "port": config.DB_PORT
-}
+# Database connection parameters are provided via config.get_db_connect_kwargs().
 
 
 def create_table_if_not_exists(conn):
@@ -135,7 +128,7 @@ def main():
     try:
         # Connect to PostgreSQL
         print("Connecting to database...")
-        with psycopg.connect(**DB_CONFIG) as conn:
+        with psycopg.connect(**config.get_db_connect_kwargs()) as conn:
 
             # Create table if not exists
             create_table_if_not_exists(conn)

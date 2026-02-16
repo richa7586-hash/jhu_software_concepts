@@ -35,8 +35,8 @@ The server listens on ``HOST`` and ``PORT`` defined in ``src/config.py``.
 
 Configuration and Environment
 -----------------------------
-There are no required environment variables by default. Database settings are
-defined in ``src/config.py``:
+Database settings are defined in ``src/config.py`` and can be provided either
+via a single ``DATABASE_URL`` or via the individual settings below.
 
 - ``DB_HOST``
 - ``DB_PORT``
@@ -44,8 +44,6 @@ defined in ``src/config.py``:
 - ``DB_USER``
 - ``DB_PASSWORD``
 
-If you prefer environment variables (for example, a single ``DATABASE_URL``),
-update ``src/config.py`` to read from ``os.environ`` and map those values.
-One simple pattern is to read ``DATABASE_URL`` (or ``DB_HOST``, ``DB_PORT``,
-``DB_NAME``, ``DB_USER``, ``DB_PASSWORD``) in ``src/config.py`` and fall back
-to the current defaults.
+When ``DATABASE_URL`` is set, the app will connect using that value. Otherwise,
+it falls back to ``DB_HOST``, ``DB_PORT``, ``DB_NAME``, ``DB_USER``, and
+``DB_PASSWORD``.

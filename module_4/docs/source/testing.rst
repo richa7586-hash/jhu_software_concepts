@@ -16,15 +16,14 @@ Run a marked subset:
    pytest -m analysis
    pytest -m db
    pytest -m integration
-   pytest -m scrape
 
 Expected UI Selectors and Text
 ------------------------------
 The tests look for these elements and labels on the analysis page:
 
-- ``#pull-data`` button labeled "Pull Data"
-- ``#update-analysis`` button labeled "Update Analysis"
-- ``#status-message`` for status updates
+- ``#pull-data`` button labeled "Pull Data" (``data-testid="pull-data-btn"``)
+- ``#update-analysis`` button labeled "Update Analysis" (``data-testid="update-analysis-btn"``)
+- ``#status-message`` for status updates (``data-testid="status-message"``)
 - "Analysis" and "Answer:" text in the rendered output
 
 Test Doubles and Fixtures

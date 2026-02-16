@@ -59,6 +59,8 @@ def test_analysis_page_contains_required_content(analysis_client):
     assert "Update Analysis" in html
     assert "Analysis" in html
     assert "Answer:" in html
+    assert 'data-testid="pull-data-btn"' in html
+    assert 'data-testid="update-analysis-btn"' in html
 
 
 @pytest.mark.web
