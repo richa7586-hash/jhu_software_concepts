@@ -40,7 +40,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Install PostgreSQL client (for readiness check)
+      - name: Install PostgreSQL client
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Wait for Postgres
@@ -51,18 +51,41 @@ jobs:
             sleep 2
           done
 
+      # ⭐⭐⭐ CREATE TABLE (FIX FOR YOUR ERROR)
+      - name: Create applicant table
+        run: |
+          PGPASSWORD=postgres psql -h localhost -U postgres -d gradcafe <<SQL
+          CREATE TABLE IF NOT EXISTS applicant (
+              p_id SERIAL PRIMARY KEY,
+              program TEXT,
+              comments TEXT,
+              date_added DATE,
+              url TEXT UNIQUE,
+              status TEXT,
+              term TEXT,
+              us_or_international TEXT,
+              gpa FLOAT,
+              gre FLOAT,
+              gre_v FLOAT,
+              gre_aw FLOAT,
+              degree TEXT,
+              llm_generated_program TEXT,
+              llm_generated_university TEXT
+          );
+          SQL
+
       # -------- VENV + REQUIREMENTS FROM module_4 --------
       - name: Create virtual environment
         run: python -m venv venv
 
-      - name: Install dependencies from module_4
+      - name: Install dependencies
         run: |
           source venv/bin/activate
           python -m pip install --upgrade pip
           pip install -r module_4/requirements.txt
 
       # -------- RUN PYTEST FROM module_4 --------
-      - name: Run pytest in module_4
+      - name: Run pytest
         run: |
           source venv/bin/activate
-          pytest module_4 -v
+          pytest module_4 --cov=module_4/src --cov-report=term-missing -v
