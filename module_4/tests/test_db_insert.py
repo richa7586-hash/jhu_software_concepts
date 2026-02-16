@@ -27,7 +27,7 @@ def test_pull_data_inserts_rows(monkeypatch, post_request):
         response = post_request("/pull-data")
 
         assert response.status_code == 200
-        assert response.get_json() == {"status": "started"}
+        assert response.get_json() == {"ok": True}
         assert count_rows(table_name) > 0
         assert count_required_fields(table_name) > 0
     finally:
@@ -47,14 +47,14 @@ def test_pull_data_is_idempotent(monkeypatch, post_request):
 
         first_response = post_request("/pull-data")
         assert first_response.status_code == 200
-        assert first_response.get_json() == {"status": "started"}
+        assert first_response.get_json() == {"ok": True}
 
         count_after_first = count_rows(table_name)
         assert count_after_first > 0
 
         second_response = post_request("/pull-data")
         assert second_response.status_code == 200
-        assert second_response.get_json() == {"status": "started"}
+        assert second_response.get_json() == {"ok": True}
 
         count_after_second = count_rows(table_name)
         assert count_after_second == count_after_first
@@ -75,7 +75,7 @@ def test_query_returns_required_keys(monkeypatch, post_request):
 
         response = post_request("/pull-data")
         assert response.status_code == 200
-        assert response.get_json() == {"status": "started"}
+        assert response.get_json() == {"ok": True}
 
         row = fetch_one_as_dict(table_name, REQUIRED_FIELDS)
         assert row is not None

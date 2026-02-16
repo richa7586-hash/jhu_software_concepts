@@ -43,7 +43,7 @@ def test_pull_data_starts_scrape_process(monkeypatch, post_request):
     started = _setup_pull_data(monkeypatch)
     response = post_request("/pull-data")
 
-    assert response.get_json() == {"status": "started"}
+    assert response.get_json() == {"ok": True}
     assert started["args"][0] == sys.executable
     assert os.path.basename(started["args"][1]) == "scrape.py"
     assert started["cwd"] == os.path.abspath(os.path.join(os.path.dirname(app_module.__file__), "../../src"))
@@ -59,7 +59,7 @@ def test_update_analysis_returns_200_when_not_busy(monkeypatch, analysis_client)
     response = client.post("/update-analysis")
 
     assert response.status_code == 200
-    assert response.get_json() == {"status": "updated"}
+    assert response.get_json() == {"ok": True}
 
 
 @pytest.mark.buttons
@@ -70,7 +70,7 @@ def test_update_analysis_returns_409_when_busy(monkeypatch, post_request):
     response = post_request("/update-analysis")
 
     assert response.status_code == 409
-    assert response.get_json() == {"status": "running"}
+    assert response.get_json() == {"busy": True}
 
 
 @pytest.mark.buttons
@@ -86,7 +86,7 @@ def test_pull_data_returns_409_when_busy(monkeypatch, post_request):
     response = post_request("/pull-data")
 
     assert response.status_code == 409
-    assert response.get_json() == {"status": "running"}
+    assert response.get_json() == {"busy": True}
 
 
 @pytest.mark.buttons

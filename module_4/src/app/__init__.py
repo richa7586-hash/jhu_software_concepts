@@ -62,13 +62,13 @@ def create_app():
         global _pull_process
         with _pull_lock:
             if _pull_process and _pull_process.poll() is None:
-                return jsonify({"status": "running"}), 409
+                return jsonify({"busy": True}), 409
 
             _pull_process = subprocess.Popen(
                 [sys.executable, os.path.join(base_dir, "scrape.py")],
                 cwd=base_dir,
             )
-        return jsonify({"status": "started"})
+        return jsonify({"ok": True})
 
     @app.route("/pull-status", methods=["GET"])
     def pull_status():
@@ -80,10 +80,10 @@ def create_app():
     def update_analysis():
         with _pull_lock:
             if _pull_process and _pull_process.poll() is None:
-                return jsonify({"status": "running"}), 409
+                return jsonify({"busy": True}), 409
 
         render_analysis_page()
-        return jsonify({"status": "updated"})
+        return jsonify({"ok": True})
 
     # Register modular page blueprints
     return app

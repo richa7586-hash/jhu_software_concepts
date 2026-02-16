@@ -28,12 +28,12 @@ def test_end_to_end_pull_update_render(monkeypatch, post_request):
 
         pull_response = post_request("/pull-data")
         assert pull_response.status_code == 200
-        assert pull_response.get_json() == {"status": "started"}
+        assert pull_response.get_json() == {"ok": True}
         assert count_rows(table_name) > 0
 
         update_response = post_request("/update-analysis")
         assert update_response.status_code == 200
-        assert update_response.get_json() == {"status": "updated"}
+        assert update_response.get_json() == {"ok": True}
 
         client = app_module.create_app().test_client()
         analysis_response = client.get("/analysis")
@@ -57,13 +57,13 @@ def test_pull_data_is_idempotent_integration(monkeypatch, post_request):
 
         first_response = post_request("/pull-data")
         assert first_response.status_code == 200
-        assert first_response.get_json() == {"status": "started"}
+        assert first_response.get_json() == {"ok": True}
         count_after_first = count_rows(table_name)
         assert count_after_first > 0
 
         second_response = post_request("/pull-data")
         assert second_response.status_code == 200
-        assert second_response.get_json() == {"status": "started"}
+        assert second_response.get_json() == {"ok": True}
         assert count_rows(table_name) == count_after_first
     finally:
         truncate_table(table_name)

@@ -60,3 +60,6 @@ After pushing to GitHub:
 1) Sign in to Read the Docs and import the repository.
 2) Ensure the default branch is selected.
 3) Trigger a build; docs will be built from ``docs/source``.
+
+Docs URL:
+https://jhu-software-concepts-module-4-richa.readthedocs.io/en/latest/
