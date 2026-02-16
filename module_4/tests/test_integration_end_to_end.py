@@ -40,6 +40,7 @@ def test_end_to_end_pull_update_render(monkeypatch, post_request):
         assert analysis_response.status_code == 200
         html = analysis_response.get_data(as_text=True)
         assert "Answer:" in html
+        assert re.search(r"\d+\.\d{2}%", html)
     finally:
         truncate_table(table_name)
 

@@ -22,7 +22,7 @@ def test_analysis_page_formats_percentages_with_two_decimals(analysis_client):
     response = client.get("/analysis")
     html = response.get_data(as_text=True)
 
-    assert "12.30" in html
+    assert "12.30%" in html
 
 
 @pytest.mark.analysis
