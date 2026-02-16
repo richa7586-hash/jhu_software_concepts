@@ -4,7 +4,7 @@ ______________________________________________________________________________ c
 Name                  Stmts   Miss  Cover   Missing
 ---------------------------------------------------
 src/__init__.py           0      0   100%
-src/app/__init__.py      58      0   100%
+src/app/__init__.py      75      0   100%
 src/clean.py             49      0   100%
 src/config.py            20      0   100%
 src/flask_app.py          2      0   100%
@@ -14,6 +14,6 @@ src/query_data.py        30      0   100%
 src/run.py                8      0   100%
 src/scrape.py           212      0   100%
 ---------------------------------------------------
-TOTAL                   478      0   100%
+TOTAL                   495      0   100%
 Required test coverage of 100% reached. Total coverage: 100.00%
-68 passed in 1.01s
+70 passed in 1.00s

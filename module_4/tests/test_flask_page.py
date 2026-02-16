@@ -1,4 +1,5 @@
 import pytest
+from bs4 import BeautifulSoup
 from flask import Flask
 
 from app import create_app
@@ -54,13 +55,14 @@ def test_analysis_page_contains_required_content(analysis_client):
     client = analysis_client()
     response = client.get("/analysis")
 
-    html = response.get_data(as_text=True)
-    assert "Pull Data" in html
-    assert "Update Analysis" in html
-    assert "Analysis" in html
-    assert "Answer:" in html
-    assert 'data-testid="pull-data-btn"' in html
-    assert 'data-testid="update-analysis-btn"' in html
+    soup = BeautifulSoup(response.get_data(as_text=True), "html.parser")
+    text = soup.get_text()
+    assert "Pull Data" in text
+    assert "Update Analysis" in text
+    assert "Analysis" in text
+    assert "Answer:" in text
+    assert soup.select_one('[data-testid="pull-data-btn"]') is not None
+    assert soup.select_one('[data-testid="update-analysis-btn"]') is not None
 
 
 @pytest.mark.web

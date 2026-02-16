@@ -18,7 +18,7 @@ from app import create_app
 
 # Factory fixture to build a client for /analysis with stubbed DB rows.
 @pytest.fixture
-def analysis_client(monkeypatch):
+def analysis_client():
     # Build a test client with stubbed DB access for /analysis.
     def _build(rows=None, question="Q1"):
         # Create a client using a fake DB connection that returns provided rows.
@@ -56,10 +56,15 @@ def analysis_client(monkeypatch):
                 # Return a stubbed cursor for query execution.
                 return DummyCursor()
 
-        monkeypatch.setattr(app_module, "question_sql_dict", {question: "SELECT 1;"})
-        monkeypatch.setattr(app_module.psycopg, "connect", lambda **kwargs: DummyConnection())
+        def fake_connect(**_kwargs):
+            # Return a dummy connection for queries.
+            return DummyConnection()
 
-        app = app_module.create_app()
+        app = app_module.create_app(
+            question_map={question: "SELECT 1;"},
+            connect_fn=fake_connect,
+            db_kwargs_fn=lambda: {},
+        )
         return app.test_client()
 
     return _build
@@ -69,9 +74,9 @@ def analysis_client(monkeypatch):
 @pytest.fixture
 def post_request():
     # Helper to post to a route using a fresh test client.
-    def _post(path, **kwargs):
+    def _post(path, app_kwargs=None, **kwargs):
         # Create a new client for each POST request.
-        app = create_app()
+        app = create_app(**(app_kwargs or {}))
         client = app.test_client()
         return client.post(path, **kwargs)
 

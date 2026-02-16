@@ -58,9 +58,9 @@ def set_sample_jsonl(monkeypatch):
     monkeypatch.setattr(load_data.config, "APPLICANT_DATA_JSON_FILE", jsonl_path)
 
 
-def install_fake_popen(monkeypatch):
-    # Replace subprocess.Popen with a loader call for tests.
-    def fake_popen(*_args, **_kwargs):
+def install_fake_popen():
+    # Return a start function that runs the loader synchronously for tests.
+    def fake_start_pull(_base_dir):
         # Run the loader synchronously for deterministic inserts.
         load_data.main()
 
@@ -71,8 +71,7 @@ def install_fake_popen(monkeypatch):
 
         return DoneProcess()
 
-    monkeypatch.setattr(app_module, "_pull_process", None)
-    monkeypatch.setattr(app_module.subprocess, "Popen", fake_popen)
+    return fake_start_pull
 
 
 def install_query_data(monkeypatch):
