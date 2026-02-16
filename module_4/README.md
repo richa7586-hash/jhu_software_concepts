@@ -23,7 +23,7 @@ The test suite uses pytest with markers to group tests by behavior:
 
 # Setup
 1) Change into the app folder:
-   cd module4
+   cd module_4
 2) Create and activate a virtual environment (optional but recommended):
    python -m venv venv
    source venv/bin/activate
@@ -44,4 +44,19 @@ Run a specific category:
 
 Tip: The tests are designed to stub network, subprocess, and database calls, so they can run quickly without external services.
 
+# Build Documentation
+Generate the Sphinx HTML docs:
+  make -C docs html
 
+Output goes to:
+  docs/build/html
+
+If make is unavailable, run:
+  sphinx-build -M html docs/source docs/build
+
+# Read the Docs
+This repo includes a ``.readthedocs.yml`` file for Read the Docs builds.
+After pushing to GitHub:
+1) Sign in to Read the Docs and import the repository.
+2) Ensure the default branch is selected.
+3) Trigger a build; docs will be built from ``docs/source``.
