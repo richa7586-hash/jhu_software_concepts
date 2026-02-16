@@ -51,11 +51,12 @@ def test_pull_data_starts_scrape_process(monkeypatch, post_request):
 
 
 @pytest.mark.buttons
-def test_update_analysis_returns_200_when_not_busy(monkeypatch, post_request):
+def test_update_analysis_returns_200_when_not_busy(monkeypatch, analysis_client):
     # Confirm update-analysis returns success when no pull is running.
     monkeypatch.setattr(app_module, "_pull_process", None)
+    client = analysis_client()
 
-    response = post_request("/update-analysis")
+    response = client.post("/update-analysis")
 
     assert response.status_code == 200
     assert response.get_json() == {"status": "updated"}
