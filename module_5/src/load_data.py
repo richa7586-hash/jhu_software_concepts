@@ -1,0 +1,159 @@
+from datetime import datetime
+import json
+import re
+import psycopg
+import config
+
+# Database connection parameters are provided via config.get_db_connect_kwargs().
+
+
+def create_table_if_not_exists(conn):
+    """Create the applicant table if it doesn't exist"""
+    create_table_query = f"""
+    CREATE TABLE IF NOT EXISTS {config.TABLE_NAME} (
+        p_id SERIAL PRIMARY KEY,
+        program TEXT,
+        comments TEXT,
+        date_added DATE,
+        url TEXT UNIQUE,
+        status TEXT,
+        term TEXT,
+        us_or_international TEXT,
+        gpa FLOAT,
+        gre FLOAT,
+        gre_v FLOAT,
+        gre_aw FLOAT,
+        degree TEXT,
+        llm_generated_program TEXT,
+        llm_generated_university TEXT
+    );
+    """
+    with conn.cursor() as cursor:
+        cursor.execute(create_table_query)
+    cursor.close()
+    print("Table 'applicant' created or already exists.")
+
+
+def parse_date(date_string):
+    """Parse date string like 'January 31, 2026' to date object"""
+    try:
+        return datetime.strptime(date_string, "%B %d, %Y").date()
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_float(value):
+    """Extract first numeric value from mixed strings (e.g., 'GPA 3.89')."""
+    if value is None:
+        return None
+    if isinstance(value, (int, float)):
+        return float(value)
+    match = re.search(r"[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?", str(value))
+    return float(match.group()) if match else None
+
+
+
+
+def load_jsonl_data(filepath):
+    """Load and parse JSONL file with correct field mapping"""
+    records = []
+    with open(filepath, 'r') as f:
+        for line in f:
+            record = json.loads(line)
+            records.append((
+                record.get('program'),
+                record.get('comments'),
+                parse_date(record.get('date_added')),
+                record.get('url'),
+                record.get('applicant_status'),
+                record.get('semester_year_start'),
+                record.get('citizenship'),
+                parse_float(record.get('gpa')),
+                parse_float(record.get('gre')),
+                parse_float(record.get('gre_v')),
+                parse_float(record.get('gre_aw')),
+                record.get('masters_or_phd'),
+                record.get('llm-generated-program'),
+                record.get('llm-generated-university')
+            ))
+    return records
+
+
+def bulk_insert_with_skip_duplicates(conn, records):
+    """Bulk insert data with ON CONFLICT DO NOTHING"""
+    insert_query = f"""
+    INSERT INTO {config.TABLE_NAME} (
+        program, comments, date_added, url, status, term,
+        us_or_international, gpa, gre, gre_v, gre_aw, degree,
+        llm_generated_program, llm_generated_university
+    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+    ON CONFLICT (url) DO NOTHING;
+    """
+    column_names = [
+        "program", "comments", "date_added", "url", "status", "term",
+        "us_or_international", "gpa", "gre", "gre_v", "gre_aw", "degree",
+        "llm_generated_program", "llm_generated_university"
+    ]
+
+    def find_nul_fields(row):
+        nul_fields = []
+        for idx, value in enumerate(row):
+            if isinstance(value, str) and "\x00" in value:
+                nul_fields.append((idx, column_names[idx]))
+        return nul_fields
+
+    with conn.cursor() as cursor:
+        try:
+            cursor.executemany(insert_query, records)
+        except psycopg.Error as e:
+            print(f"Bulk insert failed: {e}")
+            print("Scanning rows to locate the offending record...")
+            for i, row in enumerate(records, start=1):
+                try:
+                    cursor.execute(insert_query, row)
+                except psycopg.Error as row_err:
+                    nul_fields = find_nul_fields(row)
+                    if nul_fields:
+                        print(f"Row {i} contains NUL bytes in fields: {nul_fields}")
+                    print(f"Row {i} error: {row_err}")
+                    print(f"Row {i} data: {row}")
+                    raise
+        cursor.connection.commit()
+    cursor.close()
+    print(f"Successfully processed {len(records)} records (duplicates skipped).")
+
+
+def main():
+    """Main function to load data from JSONL to PostgreSQL"""
+    try:
+        # Connect to PostgreSQL
+        print("Connecting to database...")
+        with psycopg.connect(**config.get_db_connect_kwargs()) as conn:
+
+            # Create table if not exists
+            create_table_if_not_exists(conn)
+
+            # Load JSONL data
+            print("Loading JSONL data...")
+            records = load_jsonl_data(config.APPLICANT_DATA_JSON_FILE)
+            print(f"Loaded {len(records)} records from JSON file.")
+
+            # Bulk insert with duplicate handling
+            print("Inserting data into database...")
+            bulk_insert_with_skip_duplicates(conn, records)
+
+            print("Data loading completed successfully!")
+            conn.close()
+
+    except psycopg.Error as e:
+        print(f"Database error: {e}")
+    except FileNotFoundError:
+        print("Error: applicant_data.json file not found.")
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+    except Exception as e:
+        print(f"Unexpected error: {e}")
+
+
+if __name__ == "__main__":
+    main()
