@@ -1,15 +1,18 @@
-from urllib3 import request
-from bs4 import BeautifulSoup
+"""Scrape applicant data from The Grad Cafe."""
+
 import json
 import time
 import re
+import os
 from urllib.parse import urljoin
-from clean import load_data
+from urllib3 import request
+from urllib3.exceptions import HTTPError
+from bs4 import BeautifulSoup
+
+from clean import clean_data
+import load_data
 from model import ApplicantData
 import config
-from clean import clean_data
-import os
-import load_data
 
 
 class GradCafeScraper:
@@ -29,7 +32,7 @@ class GradCafeScraper:
             html = resp.data.decode("utf-8")
             return html
 
-        except Exception as e:
+        except (HTTPError, OSError, UnicodeDecodeError) as e:
             print(f"Error fetching {url}: {e}")
             return None
 
@@ -74,7 +77,8 @@ class GradCafeScraper:
                         if program_div:
                             spans = program_div.find_all('span')
                             if len(spans) >= 1 and university_div:
-                                applicant.program = spans[0].get_text(strip=True) + ', ' + university_div.get_text(strip=True)
+                                applicant.program = spans[0].get_text(strip=True) + ', ' + \
+                                                    university_div.get_text(strip=True)
                             if len(spans) >= 2:
                                 applicant.masters_or_phd = spans[1].get_text(strip=True)
 
@@ -101,9 +105,11 @@ class GradCafeScraper:
                                         continue
 
                                     # Parse semester/year
-                                    semester_match = re.search(r'(Fall|Spring|Summer)\s+(\d{4})', badge_text)
+                                    semester_match = re.search(r'(Fall|Spring|Summer)\s+(\d{4})',
+                                                               badge_text)
                                     if semester_match:
-                                        applicant.semester_year_start = f"{semester_match.group(1)} {semester_match.group(2)}"
+                                        applicant.semester_year_start = \
+                                            f"{semester_match.group(1)} {semester_match.group(2)}"
                                         continue
 
                                     # Parse student type
@@ -175,14 +181,16 @@ class GradCafeScraper:
             # Extract notification date (if not already set)
             if not applicant.decision_date:
                 page_text = soup.get_text()
-                notification_match = re.search(r'Notification\s+on[:\s]+(\d{1,2}/\d{1,2}/\d{4})', page_text,
+                notification_match = re.search(r'Notification\s+on[:\s]+(\d{1,2}/\d{1,2}/\d{4})',
+                                               page_text,
                                                re.IGNORECASE)
                 if notification_match:
                     applicant.decision_date = notification_match.group(1)
 
             # Extract student type (Degree's Country of Origin) if not already set
             if not applicant.citizenship:
-                origin_dt = soup.find("dt", string=re.compile(r"Degree'?s\s+Country\s+of\s+Origin", re.IGNORECASE))
+                origin_dt = soup.find("dt", string=re.compile(r"Degree'?s\s+Country\s+of\s+Origin",
+                                                              re.IGNORECASE))
                 if origin_dt:
                     origin_dd = origin_dt.find_next_sibling("dd")
                     if origin_dd:
@@ -200,10 +208,14 @@ class GradCafeScraper:
 
         # Extract status and status date
         status_patterns = [
-            (r'Accepted\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Accepted'),
-            (r'Rejected\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Rejected'),
-            (r'Interview\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Interview'),
-            (r'Wait\s*listed\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)', 'Wait listed'),
+            (r'Accepted\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)',
+             'Accepted'),
+            (r'Rejected\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)',
+             'Rejected'),
+            (r'Interview\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)',
+             'Interview'),
+            (r'Wait\s*listed\s+on\s+(.+?)(?=Fall|Spring|Summer|American|International|GPA|$)',
+             'Wait listed'),
         ]
 
         for pattern, status_value in status_patterns:
@@ -258,9 +270,9 @@ class GradCafeScraper:
 
     def scrape_page(self, page_num):
         """Scrape a single page (list + all detail pages)"""
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Scraping page {page_num}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Fetch list page
         list_url = self.list_url_template.format(page_num)
@@ -278,7 +290,8 @@ class GradCafeScraper:
 
         # Fetch detail pages
         for i, applicant in enumerate(applicants, 1):
-            print(f"    [{i}/{len(applicants)}] Fetching details for result {applicant.result_id}...", end=' ')
+            print(f"    [{i}/{len(applicants)}] Fetching details for result \
+                    {applicant.result_id}...", end=' ')
 
             detail_html = self.fetch_page(applicant.url)
             if detail_html:
@@ -290,8 +303,8 @@ class GradCafeScraper:
         return applicants
 
     def pull_data(self, max_seconds=10):
-        """Scrape list pages starting from page 1 for up to max_seconds."""
-        """Once pull is complete, run clean_data.py to clean and save data to JSON file."""
+        """Scrape list pages starting from page 1 for up to max_seconds.
+        Once pull is complete, run clean_data.py to clean and save data to JSON file."""
         start_time = time.time()
         page_num = 1
         total_records = 0
@@ -310,7 +323,8 @@ class GradCafeScraper:
             page_num += 1
 
         elapsed = time.time() - start_time
-        print(f"Pull complete. Pages scraped: {page_num - 1}, records saved: {total_records}, time: {elapsed:.1f}s")
+        print(f"Pull complete. Pages scraped: {page_num - 1},"
+              f"records saved: {total_records}, time: {elapsed:.1f}s")
         llm_script_path = os.path.join(os.path.dirname(__file__), "../llm_hosting", "app.py")
         clean_data(
             input_file=self.data_file,

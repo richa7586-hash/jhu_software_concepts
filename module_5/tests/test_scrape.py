@@ -85,7 +85,7 @@ def test_fetch_page_handles_exception(monkeypatch):
     # fetch_page should return None when the request raises.
     def _raise(*_args, **_kwargs):
         # Simulate a network error.
-        raise RuntimeError("boom")
+        raise OSError("boom")
 
     monkeypatch.setattr(scrape, "request", _raise)
 
