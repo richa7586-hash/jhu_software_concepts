@@ -1,3 +1,5 @@
+"""Load applicant JSONL data and insert into PostgreSQL."""
+
 from datetime import datetime
 import json
 import re
@@ -52,12 +54,10 @@ def parse_float(value):
     return float(match.group()) if match else None
 
 
-
-
 def load_jsonl_data(filepath):
     """Load and parse JSONL file with correct field mapping"""
     records = []
-    with open(filepath, 'r') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         for line in f:
             record = json.loads(line)
             records.append((
@@ -151,9 +151,5 @@ def main():
         print("Error: applicant_data.json file not found.")
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
-    except Exception as e:
-        print(f"Unexpected error: {e}")
-
-
 if __name__ == "__main__":
     main()

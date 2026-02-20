@@ -1,26 +1,28 @@
-import config
+"""Query reporting metrics from the database."""
+
 import psycopg
+import config
 
 # Database connection parameters are provided via config.get_db_connect_kwargs().
 
 # Question and sql dic
-question_sql_dict = dict()
+question_sql_dict = {}
 
-question_sql_dict["How many entries do you have in your database who have applied for Fall 2026?"] = \
-    f"""
+question_sql_dict["How many entries do you have in your database who have applied for Fall 2026?"]\
+    = f"""
         SELECT COUNT(*) 
-        FROM {config.TABLE_NAME} 
-        WHERE term = 'Fall 2026';
-    """
-question_sql_dict[("What percentage of entries are from international students (not American or Other) (to two decimal "
-                   "places)?")] = \
+        FROM {config.TABLE_NAME}
+        WHERE term = 'Fall 2026';"""
+
+question_sql_dict["What percentage of entries are from international students (not American\
+    or Other) (to two decimal places)?"] = \
     f"""
         SELECT ROUND(COUNT(CASE WHEN us_or_international NOT IN ('American', 'Other') THEN 1 END) * 100.0 / COUNT(*), 2)
         FROM {config.TABLE_NAME};
     """
 
-question_sql_dict["What is the average GPA, GRE, GRE V, GRE AW of applicants who provide these metrics?"] = \
-    f"""
+question_sql_dict["What is the average GPA, GRE, GRE V, GRE AW of applicants who provide\
+    these metrics?"] = f"""
         SELECT ROUND(AVG(gpa)::numeric, 2)   AS avg_gpa, ROUND(AVG(gre)::numeric,2) AS avg_gre, 
             ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v, ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
         FROM {config.TABLE_NAME}
@@ -34,22 +36,23 @@ question_sql_dict["What is their average GPA of American students in Fall 2026?"
         WHERE us_or_international = 'American' AND term = 'Fall 2026';
     """
 
-question_sql_dict["What percent of entries for Fall 2026 are Acceptances (to two decimal places)?"] = \
-    f"""
+question_sql_dict["What percent of entries for Fall 2026 are Acceptances (to two \
+    decimal places)?"] = f"""
         SELECT ROUND(COUNT(CASE WHEN status = 'Accepted' THEN 1 END) * 100.0 / COUNT(*), 2)
         FROM {config.TABLE_NAME}
         WHERE term = 'Fall 2026';
     """
 
-question_sql_dict["What is the average GPA of applicants who applied for Fall 2026 who are Acceptances?"] = \
+question_sql_dict["What is the average GPA of applicants who applied for Fall 2026 \
+    who are Acceptances?"] = \
     f"""
         SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
         FROM {config.TABLE_NAME}
         WHERE term = 'Fall 2026' AND status = 'Accepted';
     """
 
-question_sql_dict[
-    "How many entries are from applicants who applied to JHU for a masters degrees in Computer Science?"] = \
+question_sql_dict["How many entries are from applicants who applied to JHU for \
+    a masters degrees in Computer Science?"] = \
     f"""
         SELECT COUNT(*) 
         FROM {config.TABLE_NAME}
@@ -61,8 +64,9 @@ question_sql_dict[
             OR llm_generated_university like '%JHU%');
     """
 
-question_sql_dict[("How many entries from 2026 are acceptances from applicants who applied to Georgetown University, "
-                   "MIT, Stanford University, or Carnegie Mellon University for a PhD in Computer Science?")] = \
+question_sql_dict[("How many entries from 2026 are acceptances from applicants who applied \
+    to Georgetown University, MIT, Stanford University, or Carnegie Mellon University for \
+    a PhD in Computer Science?")] = \
     f"""
         SELECT COUNT(*) AS phd_cs_acceptances_count
         FROM {config.TABLE_NAME}
@@ -79,8 +83,8 @@ question_sql_dict[("How many entries from 2026 are acceptances from applicants w
 
     """
 
-question_sql_dict[("Do you numbers for question 8 change if you use LLM Generated Fields (rather than your downloaded "
-                   "fields)?")] = \
+question_sql_dict[("Do you numbers for question 8 change if you use LLM Generated Fields \
+    (rather than your downloaded fields)?")] = \
     f"""
         SELECT COUNT(*) AS phd_cs_acceptances_count
         FROM {config.TABLE_NAME}
@@ -127,6 +131,7 @@ question_sql_dict["How many total applicants you have in your db?"] = \
 
 
 def main():
+    """Run all configured questions and print their results."""
     with psycopg.connect(**config.get_db_connect_kwargs()) as conn:
         # Open a cursor to execute SQL queries
         cur = conn.cursor()

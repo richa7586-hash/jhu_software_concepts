@@ -141,15 +141,6 @@ def test_main_handles_json_decode_error(monkeypatch, capsys):
 
 
 @pytest.mark.db
-def test_main_handles_unexpected_error(monkeypatch):
-    # Unexpected exceptions should be handled without raising.
-    monkeypatch.setattr(load_data.psycopg, "connect", lambda **_kwargs: FakeConnection(FakeCursor()))
-    monkeypatch.setattr(load_data, "load_jsonl_data", lambda _path: (_ for _ in ()).throw(RuntimeError("boom")))
-
-    load_data.main()
-
-
-@pytest.mark.db
 def test_module_main_executes_with_fake_db(monkeypatch, tmp_path):
     # Execute the __main__ block with a fake database connection.
     data_path = tmp_path / "data.json.jsonl"
