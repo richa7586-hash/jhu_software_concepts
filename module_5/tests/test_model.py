@@ -44,3 +44,19 @@ def test_applicant_data_to_dict_exposes_all_fields():
     assert data["gre"] is None
     assert data["gre_v"] is None
     assert data["gre_aw"] is None
+
+
+@pytest.mark.db
+def test_applicant_data_getattr_raises_for_unknown_field():
+    # Unknown fields should raise AttributeError.
+    applicant = ApplicantData()
+    with pytest.raises(AttributeError):
+        _ = applicant.unknown_field
+
+
+@pytest.mark.db
+def test_applicant_data_setattr_raises_for_unknown_field():
+    # Unknown fields should raise AttributeError because of __slots__.
+    applicant = ApplicantData()
+    with pytest.raises(AttributeError):
+        applicant.unknown_field = "value"

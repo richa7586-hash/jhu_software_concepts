@@ -1,3 +1,5 @@
+"""Run the Flask application entrypoint."""
+
 import sys
 
 from app import create_app

@@ -69,8 +69,8 @@ and answers from <code class="docutils literal notranslate"><span class="pre">sr
 </section>
 <section id="configuration-and-environment">
 <h2>Configuration and Environment<a class="headerlink" href="#configuration-and-environment" title="Link to this heading">¶</a></h2>
-<p>There are no required environment variables by default. Database settings are
-defined in <code class="docutils literal notranslate"><span class="pre">src/config.py</span></code>:</p>
+<p>Database settings are defined in <code class="docutils literal notranslate"><span class="pre">src/config.py</span></code> and can be provided either
+via a single <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> or via the individual settings below.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">DB_HOST</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DB_PORT</span></code></p></li>
@@ -78,11 +78,22 @@ defined in <code class="docutils literal notranslate"><span class="pre">src/conf
 <li><p><code class="docutils literal notranslate"><span class="pre">DB_USER</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">DB_PASSWORD</span></code></p></li>
 </ul>
-<p>If you prefer environment variables (for example, a single <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code>),
-update <code class="docutils literal notranslate"><span class="pre">src/config.py</span></code> to read from <code class="docutils literal notranslate"><span class="pre">os.environ</span></code> and map those values.
-One simple pattern is to read <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> (or <code class="docutils literal notranslate"><span class="pre">DB_HOST</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_PORT</span></code>,
-<code class="docutils literal notranslate"><span class="pre">DB_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_USER</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_PASSWORD</span></code>) in <code class="docutils literal notranslate"><span class="pre">src/config.py</span></code> and fall back
-to the current defaults.</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">DATABASE_URL</span></code> is set, the app will connect using that value. Otherwise,
+it falls back to <code class="docutils literal notranslate"><span class="pre">DB_HOST</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_PORT</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_NAME</span></code>, <code class="docutils literal notranslate"><span class="pre">DB_USER</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">DB_PASSWORD</span></code>.</p>
+</section>
+<section id="api-response-notes">
+<h2>API Response Notes<a class="headerlink" href="#api-response-notes" title="Link to this heading">¶</a></h2>
+<p>The button endpoints return JSON:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/pull-data</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;:</span> <span class="pre">true}</span></code> on success, <code class="docutils literal notranslate"><span class="pre">{&quot;busy&quot;:</span> <span class="pre">true}</span></code> with 409
+if a pull is already running, and <code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;:</span> <span class="pre">false}</span></code> with 500 if the pull
+fails to start.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">POST</span> <span class="pre">/update-analysis</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;:</span> <span class="pre">true}</span></code> on success and <code class="docutils literal notranslate"><span class="pre">{&quot;busy&quot;:</span> <span class="pre">true}</span></code>
+with 409 when a pull is in progress.</p></li>
+</ul>
+<p>Percent answers render with two decimals and a trailing percent sign (e.g.,
+<code class="docutils literal notranslate"><span class="pre">39.28%</span></code>).</p>
 </section>
 </section>
 
@@ -118,6 +129,7 @@ to the current defaults.</p>
 <li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#setup">Setup</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#configuration-and-environment">Configuration and Environment</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#api-response-notes">API Response Notes</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="architecture.html">Architecture</a></li>

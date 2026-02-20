@@ -74,7 +74,7 @@ jobs:
           );
           SQL
 
-      # -------- VENV + REQUIREMENTS FROM module_4 --------
+      # -------- VENV + REQUIREMENTS FROM module_5 --------
       - name: Create virtual environment
         run: python -m venv venv
 
@@ -82,10 +82,16 @@ jobs:
         run: |
           source venv/bin/activate
           python -m pip install --upgrade pip
-          pip install -r module_4/requirements.txt
+          pip install -r module_5/requirements.txt
 
-      # -------- RUN PYTEST FROM module_4 --------
+      # -------- RUN PYLINT FROM module_5 --------
+      - name: Run pylint
+        run: |
+          source venv/bin/activate
+          pylint --rcfile module_5/.pylintrc module_5/src
+
+      # -------- RUN PYTEST FROM module_5 --------
       - name: Run pytest
         run: |
           source venv/bin/activate
-          pytest module_4 --cov=module_4/src --cov-report=term-missing -v
+          pytest module_5 --cov=module_5/src --cov-report=term-missing -v

@@ -44,17 +44,16 @@ pytest<span class="w"> </span>-m<span class="w"> </span>buttons
 pytest<span class="w"> </span>-m<span class="w"> </span>analysis
 pytest<span class="w"> </span>-m<span class="w"> </span>db
 pytest<span class="w"> </span>-m<span class="w"> </span>integration
-pytest<span class="w"> </span>-m<span class="w"> </span>scrape
 </pre></div>
 </div>
 <section id="expected-ui-selectors-and-text">
 <h2>Expected UI Selectors and Text<a class="headerlink" href="#expected-ui-selectors-and-text" title="Link to this heading">¶</a></h2>
 <p>The tests look for these elements and labels on the analysis page:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">#pull-data</span></code> button labeled “Pull Data”</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">#update-analysis</span></code> button labeled “Update Analysis”</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">#status-message</span></code> for status updates</p></li>
-<li><p>“Analysis” and “Answer:” text in the rendered output</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#pull-data</span></code> button labeled “Pull Data” (<code class="docutils literal notranslate"><span class="pre">data-testid=&quot;pull-data-btn&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#update-analysis</span></code> button labeled “Update Analysis” (<code class="docutils literal notranslate"><span class="pre">data-testid=&quot;update-analysis-btn&quot;</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">#status-message</span></code> for status updates (<code class="docutils literal notranslate"><span class="pre">data-testid=&quot;status-message&quot;</span></code>)</p></li>
+<li><p>“Analysis” title text and “Answer:” labels in the rendered output</p></li>
 </ul>
 </section>
 <section id="test-doubles-and-fixtures">
@@ -63,10 +62,18 @@ pytest<span class="w"> </span>-m<span class="w"> </span>scrape
 calls:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">analysis_client</span></code> and <code class="docutils literal notranslate"><span class="pre">post_request</span></code> in <code class="docutils literal notranslate"><span class="pre">tests/conftest.py</span></code>.</p></li>
+<li><p>Dependency injection hooks passed to <code class="docutils literal notranslate"><span class="pre">create_app</span></code> allow tests to provide
+fake DB connections and pull starters without patching globals.</p></li>
 <li><p>DB helpers in <code class="docutils literal notranslate"><span class="pre">tests/utils/db_test_utils.py</span></code> for stubbed inserts and queries.</p></li>
 <li><p>Scraper tests monkeypatch <code class="docutils literal notranslate"><span class="pre">urllib3.request</span></code>, <code class="docutils literal notranslate"><span class="pre">clean.clean_data</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">load_data.main</span></code> to keep the run deterministic.</p></li>
 </ul>
+</section>
+<section id="error-path-coverage">
+<h2>Error-path Coverage<a class="headerlink" href="#error-path-coverage" title="Link to this heading">¶</a></h2>
+<p>There is a negative-path test for pull failures. When the pull starter raises
+an exception, <code class="docutils literal notranslate"><span class="pre">/pull-data</span></code> returns HTTP 500 with <code class="docutils literal notranslate"><span class="pre">{&quot;ok&quot;:</span> <span class="pre">false}</span></code>, and tests
+verify that no rows are inserted.</p>
 </section>
 </section>
 
@@ -104,6 +111,7 @@ calls:</p>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Testing Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#expected-ui-selectors-and-text">Expected UI Selectors and Text</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#test-doubles-and-fixtures">Test Doubles and Fixtures</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#error-path-coverage">Error-path Coverage</a></li>
 </ul>
 </li>
 </ul>

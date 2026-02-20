@@ -205,7 +205,7 @@ def test_clean_data_unexpected_exception_returns_false(tmp_path, monkeypatch):
 
     def fail_run(*_args, **_kwargs):
         # Simulate an unexpected exception.
-        raise RuntimeError("boom")
+        raise OSError("boom")
 
     monkeypatch.setattr(clean.subprocess, "run", fail_run)
 

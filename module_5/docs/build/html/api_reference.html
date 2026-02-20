@@ -82,6 +82,7 @@
 </section>
 <section id="module-clean">
 <span id="clean-py"></span><h2>clean.py<a class="headerlink" href="#module-clean" title="Link to this heading">¶</a></h2>
+<p>Load and clean applicant data using the LLM cleaning script.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="clean.clean_data">
 <span class="sig-prename descclassname"><span class="pre">clean.</span></span><span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">llm_script_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'../llm_hosting/app.py'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#clean.clean_data" title="Link to this definition">¶</a></dt>
@@ -153,7 +154,7 @@
 - POST /update-analysis -&gt; refresh analysis results</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="flask_app.create_app">
-<span class="sig-prename descclassname"><span class="pre">flask_app.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#flask_app.create_app" title="Link to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">flask_app.</span></span><span class="sig-name descname"><span class="pre">create_app</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">question_map</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">connect_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_kwargs_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_pull_fn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#flask_app.create_app" title="Link to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </section>

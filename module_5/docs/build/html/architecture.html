@@ -45,6 +45,13 @@
 </ul>
 <p>The app queries PostgreSQL via <code class="docutils literal notranslate"><span class="pre">psycopg</span></code> and renders results with the
 template in <code class="docutils literal notranslate"><span class="pre">src/app/templates/index.html</span></code>.</p>
+<p>For testability, <code class="docutils literal notranslate"><span class="pre">create_app</span></code> accepts dependency injection hooks for:</p>
+<ul class="simple">
+<li><p>Query map overrides (<code class="docutils literal notranslate"><span class="pre">question_map</span></code>)</p></li>
+<li><p>Database connection factory (<code class="docutils literal notranslate"><span class="pre">connect_fn</span></code>)</p></li>
+<li><p>DB connection kwargs (<code class="docutils literal notranslate"><span class="pre">db_kwargs_fn</span></code>)</p></li>
+<li><p>Pull starter (<code class="docutils literal notranslate"><span class="pre">start_pull_fn</span></code>)</p></li>
+</ul>
 </section>
 <section id="etl-layer">
 <h2>ETL Layer<a class="headerlink" href="#etl-layer" title="Link to this heading">¶</a></h2>

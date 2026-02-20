@@ -1,3 +1,5 @@
+"""Load and clean applicant data using the LLM cleaning script."""
+
 import json
 import subprocess
 import os
@@ -17,7 +19,7 @@ def load_data(file_path=None):
     except FileNotFoundError:
         print(f"File not found: {file_path}")
         return []
-    except Exception as e:
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as e:
         print(f"Error loading data: {e}")
         return []
 
@@ -55,13 +57,13 @@ def clean_data(input_file=None, llm_script_path="../llm_hosting/app.py", output_
         if e.stderr:
             print(e.stderr)
         return False
-    except Exception as e:
+    except (OSError, subprocess.SubprocessError) as e:
         print(f"Error: {e}")
         return False
 
 
 if __name__ == '__main__':
     # Example usage
-    data = load_data()
-    if data:
+    applicant_data = load_data()
+    if applicant_data:
         clean_data()

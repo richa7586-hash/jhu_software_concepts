@@ -1,4 +1,5 @@
-# Configuration settings for the Flask application.
+"""Configuration settings for the Flask application."""
+
 import os
 HOST = "0.0.0.0"
 PORT = 8080
