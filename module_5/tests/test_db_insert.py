@@ -72,7 +72,7 @@ def test_pull_data_returns_500_when_loader_fails(monkeypatch, post_request):
     try:
         def failing_start_pull(_base_dir):
             # Simulate a loader startup failure.
-            raise RuntimeError("boom")
+            raise OSError("boom")
 
         response = post_request("/pull-data", app_kwargs={"start_pull_fn": failing_start_pull})
 

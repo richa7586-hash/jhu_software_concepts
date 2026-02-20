@@ -12,6 +12,11 @@ class BusyProcess:
         return None
 
 
+def _set_pull_process(monkeypatch, process):
+    # Replace the module-level pull state for a clean test setup.
+    monkeypatch.setattr(app_module, "_pull_state", {"process": process})
+
+
 def _setup_pull_data(monkeypatch):
     # Build a start function that records pull-data invocation details.
     started = {}
@@ -22,7 +27,7 @@ def _setup_pull_data(monkeypatch):
         started["cwd"] = base_dir
         return BusyProcess()
 
-    monkeypatch.setattr(app_module, "_pull_process", None)
+    _set_pull_process(monkeypatch, None)
     return started, fake_start_pull
 
 
@@ -45,13 +50,13 @@ def test_pull_data_starts_scrape_process(monkeypatch, post_request):
     assert started["args"][0] == sys.executable
     assert os.path.basename(started["args"][1]) == "scrape.py"
     assert started["cwd"] == os.path.abspath(os.path.join(os.path.dirname(app_module.__file__), "../../src"))
-    assert app_module._pull_process is not None
+    assert app_module._pull_state["process"] is not None
 
 
 @pytest.mark.buttons
 def test_update_analysis_returns_200_when_not_busy(monkeypatch, analysis_client):
     # Confirm update-analysis returns success when no pull is running.
-    monkeypatch.setattr(app_module, "_pull_process", None)
+    _set_pull_process(monkeypatch, None)
     client = analysis_client()
 
     response = client.post("/update-analysis")
@@ -63,7 +68,7 @@ def test_update_analysis_returns_200_when_not_busy(monkeypatch, analysis_client)
 @pytest.mark.buttons
 def test_update_analysis_returns_409_when_busy(monkeypatch, post_request):
     # Ensure update-analysis is blocked when a pull is already running.
-    monkeypatch.setattr(app_module, "_pull_process", BusyProcess())
+    _set_pull_process(monkeypatch, BusyProcess())
 
     response = post_request("/update-analysis")
 
@@ -78,7 +83,7 @@ def test_pull_data_returns_409_when_busy(monkeypatch, post_request):
         # Fail fast if the endpoint tries to start a process.
         raise AssertionError("pull-data should not start when busy")
 
-    monkeypatch.setattr(app_module, "_pull_process", BusyProcess())
+    _set_pull_process(monkeypatch, BusyProcess())
 
     response = post_request("/pull-data", app_kwargs={"start_pull_fn": fail_start_pull})
 
@@ -89,7 +94,7 @@ def test_pull_data_returns_409_when_busy(monkeypatch, post_request):
 @pytest.mark.buttons
 def test_pull_status_reflects_running_process(monkeypatch):
     # Confirm pull-status reports a running pull.
-    monkeypatch.setattr(app_module, "_pull_process", BusyProcess())
+    _set_pull_process(monkeypatch, BusyProcess())
 
     app = app_module.create_app()
     client = app.test_client()
@@ -110,7 +115,7 @@ def test_pull_data_uses_default_start(monkeypatch, post_request):
         started["cwd"] = cwd
         return BusyProcess()
 
-    monkeypatch.setattr(app_module, "_pull_process", None)
+    _set_pull_process(monkeypatch, None)
     monkeypatch.setattr(app_module.subprocess, "Popen", fake_popen)
 
     response = post_request("/pull-data")
